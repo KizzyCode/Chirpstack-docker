@@ -1,0 +1,237 @@
+# Logging configuration
+[logging]
+# Log level.
+#
+# Valid options are:
+#   * TRACE
+#   * DEBUG
+#   * INFO
+#   * WARN
+#   * ERROR
+#   * OFF
+level="INFO"
+# Log as JSON.
+json=false
+
+# PostgreSQL configuration.
+[postgresql]
+# PostgreSQL DSN.
+#
+# Format example: postgres://<USERNAME>:<PASSWORD>@<HOSTNAME>/<DATABASE>?sslmode=<SSLMODE>.
+#
+# SSL mode options:
+#  * disable - no SSL
+#  * require - Always SSL (skip verification)
+#  * verify-ca - Always SSL (verify that the certificate presented by the server was signed by a trusted CA)
+#  * verify-full - Always SSL (verify that the certification presented by the server was signed by a trusted CA and the server host name matches the one in the certificate)
+dsn="postgresql://chirpstack:chirpstack@localhost/chirpstack?sslmode=disable"
+# Max open connections.
+#
+# This sets the max. number of open connections that are allowed in the
+# PostgreSQL connection pool.
+max_open_connections=10
+# Min idle connections.
+#
+# This sets the min. number of idle connections in the PostgreSQL connection
+# pool (0 = equal to max_open_connections).
+min_idle_connections=0
+
+
+# Redis configuration.
+[redis]
+# Server address or addresses.
+#
+# Use rediss:// in case of a TLS secured connection.
+#
+# Example formats:
+#   redis://127.0.0.1:6379
+#   rediss://127.0.0.1:6379
+#   redis://:password@127.0.0.1:6379
+#   redis://username:password@127.0.0.1:6379
+#
+# Set multiple addresses when connecting to a cluster.
+servers=[
+    "redis://127.0.0.1/",
+]
+# Redis Cluster.
+#
+# Set this to true when the provided URLs are pointing to a Redis Cluster
+# instance.
+cluster=false
+# Key prefix.
+#
+# A key prefix can be used to avoid key collisions when multiple deployments
+# are using the same Redis database and it is not possible to separate
+# keys by database index (e.g. when using Redis Cluster, which does not
+# support multiple databases).
+key_prefix=""
+# Max open connections.
+#
+# This sets the max. number of open connections that are allowed in the
+# Redis connection pool.
+max_open_connections=100
+# Min idle connections.
+#
+# This sets the min. number of idle connections in the Redis connection
+# pool (0 = equal to max_open_connections).
+min_idle_connections=0
+
+
+# API interface configuration.
+[api]
+# interface:port to bind the API interface to.
+bind="0.0.0.0:8080"
+# Secret.
+#
+# This secret is used for generating login and API tokens, make sure this
+# is never exposed. Changing this secret will invalidate all login and API
+# tokens. The following command can be used to generate a random secret:
+#   openssl rand -base64 32
+secret="FIXME"
+
+
+# Network related configuration.
+[network]
+# Network identifier (NetID, 3 bytes) encoded as HEX (e.g. 010203).
+net_id="000000"
+# Secondary NetIDs.
+#
+# Additional NetIDs. At this moment, the additional NetIDs are only used to
+# validate if an uplink belongs to the ChirpStack instance or if it is a
+# roaming device (if roaming is enabled).
+# If you would like to assign DevAddrs from multiple NetIDs, you must specify
+# these in the dev_addr_prefixes configuration.
+secondary_net_ids=[
+]
+# DevAddr prefix(es).
+#
+# This makes it possible to configure one or multiple DevAddr (sub)ranges
+# If left blank, then the complete DevAddr space provided by the configured
+# net_id value will be used. If multiple prefixes are configured, a random
+# prefix will be chosen when generating a DevAddr.
+#
+# Example configuration:
+# dev_addr_prefixes=["0000ff00/24"]
+#
+# This example configures the DevAddr range to 0000ff00 - 0000ffff.
+# The /24 means that the 24MSB of the prefix will be used, meaning that the
+# 8LSB will be used as address space.
+dev_addr_prefixes=[
+]
+# Enabled regions.
+#
+# Multiple regions can be enabled simultaneously. Each region must match
+# the 'name' parameter of the region configuration in '[[regions]]'.
+enabled_regions=[
+]
+# Device session expiration.
+#
+# The TTL value defines the time after which a device-session expires
+# after no activity.
+device_session_ttl="1month 13h 26m 24s"
+# Time to wait for uplink de-duplication.
+#
+# This is the time that ChirpStack will wait for other gateways to receive
+# the same uplink frame. Please note that this value affects the
+# roundtrip time. The total roundtrip time (which includes network latency)
+# must be less than the (first) receive-window.
+deduplication_delay="200ms"
+# Get downlink data delay.
+#
+# This is the time that ChirpStack waits between forwarding data to the
+# integration(s) and reading data from the queue. A higher value means that
+# an end-application has more time to schedule a downlink queue item which
+# can be processed within the same uplink / downlink transaction.
+# Please note that this value has influence on the uplink / downlink
+# roundtrip time. Setting this value too high means ChirpStack will be
+# unable to respond to the device within its receive-window.
+get_downlink_data_delay="100ms"
+# Mac-commands disabled.
+mac_commands_disabled=false
+# Custom ADR plugins.
+#
+# The custom ADR plugin must be implemented in JavaScript. For an example
+# skeleton, please see:
+# https://github.com/chirpstack/chirpstack/blob/master/examples/adr_plugins/plugin_skeleton.js
+adr_plugins=[
+]
+
+
+# Scheduler settings.
+[network.scheduler]
+# Scheduler interval.
+#
+# The interval in which the downlink scheduler for multicast, Class-B and
+# Class-C runs.
+interval="1s"
+# Class-A lock duration.
+#
+# This defines the lock duration between receiving a Class-A uplink and
+# the next scheduler-run for a device. The purpose of this lock is to
+# avoid collisions between Class-A and Class-B/C downlinks.
+class_a_lock_duration="5s"
+# Class-C lock duration.
+#
+# This defines the lock duration between scheduling two Class-C downlink
+# payloads for the same device. The purpose of this lock is to avoid
+# overlap between scheduling Class-C downlinks and / or spreading the 
+# downlink capacity load on the gateway.
+class_c_lock_duration="5s"
+# Multicast Class-C margin.
+#
+# This defines the minimum margin between scheduling multiple multicast downlinks
+# (within the same multicast-group). This value must be equal or greater than the
+# scheduler interval.
+multicast_class_c_margin="5s"
+# Multicast Class-B margin.
+#
+# This defines the minimum margin between scheduling multiple multicast downlinks
+# (within the same multicast-group). This value must be equal or greater than the
+# scheduler interval.
+multicast_class_b_margin="5s"
+
+
+# Global integration related configuration.
+[integration]
+# Enabled integrations (global).
+enabled = [
+]
+
+# MQTT integration configuration.
+[integration.mqtt]
+# Event topic template.
+event_topic="application/{{application_id}}/device/{{dev_eui}}/event/{{event}}"
+# Command topic.
+#
+# This is the topic on which the MQTT subscribes for receiving (enqueue) commands.
+command_topic="application/{{application_id}}/device/{{dev_eui}}/command/{{command}}"
+# Use JSON encoding instead of Protobuf (binary).
+json=false
+# MQTT server (e.g. scheme://host:port where scheme is tcp, ssl or ws)
+server="tcp://127.0.0.1:1883/"
+# Quality of service level
+#
+# 0: at most once
+# 1: at least once
+# 2: exactly once
+#
+# Note: an increase of this value will decrease the performance.
+# For more information: https://www.hivemq.com/blog/mqtt-essentials-part-6-mqtt-quality-of-service-levels
+qos=0
+# Clean session
+#
+# Set the "clean session" flag in the connect message when this client
+# connects to an MQTT broker. By setting this flag you are indicating
+# that no messages saved by the broker for this client should be delivered.
+clean_session=false
+# Client ID
+#
+# Set the client id to be used by this client when connecting to the MQTT
+# broker. A client id must be no longer than 23 characters. If left blank,
+# a random id will be generated by ChirpStack.
+client_id=""
+# Keep alive interval.
+#
+# This defines the maximum time that that should pass without communication
+# between the client and server.
+keep_alive_interval="30s"

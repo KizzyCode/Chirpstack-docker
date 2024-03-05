@@ -1,0 +1,13 @@
+services:
+  chirpstack:
+    build: ./
+    ports:
+      - 127.0.0.1:8080:8080/tcp
+    volumes:
+      # Mount persistent database files
+      - ./persist:/var/postgres:rw
+      # Mount chirpstack config
+      - ./example/chirpstack.toml:/etc/chirpstack/chirpstack.toml:ro
+      - ./example/chirpstack-gateway.toml:/etc/chirpstack-gateway-bridge/chirpstack-gateway-bridge.toml:ro
+    environment:
+      - TZ=Europe/Berlin
